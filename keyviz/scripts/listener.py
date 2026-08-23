@@ -114,7 +114,7 @@ KEY_NAMES = {
     96: "KP Enter",
     97: "Ctrl",
     98: "KP /",
-    99: "SysRq",
+    99: "Print",
     100: "Alt",
     102: "Home",
     103: "Up",
@@ -148,6 +148,7 @@ KEY_NAMES = {
     192: "F22",
     193: "F23",
     194: "F24",
+    210: "Print",
 }
 
 MODIFIER_CODES = {

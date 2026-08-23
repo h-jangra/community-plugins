@@ -4,8 +4,8 @@ version = "0.1.0"
 plugin_api = 13
 author = "h-jangra"
 license = "MIT"
-dependencies = []
-tags = ["utility", "input", "visualizer", "overlay", "key"]
+dependencies = ["python3"]
+tags = ["utility", "bar", "service", "shortcut", "panel"]
 icon = "keyboard"
 description = "Real-time floating on-screen keystroke visualizer for Noctalia."
 
