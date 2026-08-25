@@ -6,6 +6,7 @@ local lastPress = 0
 local lastWasModifier = false
 local listenerRunning = false
 local listenerPid: number? = nil
+local panelOpen = false
 
 noctalia.state.set("is_active", active)
 noctalia.state.set("active_keys", {})
@@ -13,14 +14,20 @@ noctalia.state.set("active_keys", {})
 local script = `{noctalia.pluginDir()}/scripts/listener.py`
 
 local function openPanel()
-  if type(noctalia.runAsync) == "function" then
-    noctalia.runAsync("/usr/bin/noctalia msg panel-open h-jangra/keyviz:overlay", function() end)
+  if not panelOpen then
+    if type(noctalia.togglePanel) == "function" then
+      noctalia.togglePanel("h-jangra/keyviz:overlay")
+    end
+    panelOpen = true
   end
 end
 
 local function closePanel()
-  if type(noctalia.runAsync) == "function" then
-    noctalia.runAsync("/usr/bin/noctalia msg panel-close h-jangra/keyviz:overlay", function() end)
+  if panelOpen then
+    if type(noctalia.togglePanel) == "function" then
+      noctalia.togglePanel("h-jangra/keyviz:overlay")
+    end
+    panelOpen = false
   end
 end
 

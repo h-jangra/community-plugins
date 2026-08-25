@@ -76,6 +76,8 @@ options = [
   { value = "glass", label_key = "settings.badge_style.options.glass" },
   { value = "solid", label_key = "settings.badge_style.options.solid" },
   { value = "accent", label_key = "settings.badge_style.options.accent" },
+  { value = "keycap_dark", label_key = "settings.badge_style.options.keycap_dark" },
+  { value = "keycap_light", label_key = "settings.badge_style.options.keycap_light" },
 ]
 default = "glass"
 

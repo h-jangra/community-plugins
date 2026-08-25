@@ -16,8 +16,8 @@ end)
 function onClick()
   active = not active
   noctalia.state.set("is_active", active)
-  if active and type(noctalia.runAsync) == "function" then
-    noctalia.runAsync("/usr/bin/noctalia msg panel-open h-jangra/keyviz:overlay", function() end)
+  if active and type(noctalia.togglePanel) == "function" then
+    noctalia.togglePanel("h-jangra/keyviz:overlay")
   end
   render()
 end

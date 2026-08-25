@@ -17,27 +17,42 @@ local symbols = {
 }
 
 local function getFontSize()
-  local size = noctalia.getConfig("font_size") or "medium"
+  local val = noctalia.getConfig("font_size")
 
-  if size == "small" then
-    return 11
-  elseif size == "large" then
-    return 15
+  if type(val) == "number" then
+    return val
+  elseif type(val) == "string" then
+    local cleaned = string.gsub(val, "px", "")
+    local num = tonumber(cleaned)
+    if num then
+      return num
+    end
+    if val == "small" then
+      return 13
+    elseif val == "large" then
+      return 20
+    elseif val == "medium" then
+      return 16
+    end
   end
 
-  return 13
+  return 16
 end
 
 local function getStyle()
   local style = noctalia.getConfig("badge_style") or "glass"
 
   if style == "solid" then
-    return "surface_container_high", "outline", 1
+    return { fill = "surface_container_high", border = "outline", borderWidth = 1, textColor = "on_surface", isKeycap = false }
   elseif style == "accent" then
-    return "primary/0.16", "primary/0.75", 1
+    return { fill = "primary/0.16", border = "primary/0.75", borderWidth = 1, textColor = "primary", isKeycap = false }
+  elseif style == "keycap_dark" then
+    return { fill = "#1e1e24", border = "#2d2e38", textColor = "#ffffff", isKeycap = true, baseColor = "#0d0e12", shadowColor = "#000000" }
+  elseif style == "keycap_light" then
+    return { fill = "#f5f5f7", border = "#ffffff", textColor = "#111116", isKeycap = true, baseColor = "#000000", shadowColor = "#000000" }
   end
 
-  return "surface_container_high/0.92", "outline/0.55", 1
+  return { fill = "surface_container_high/0.92", border = "outline/0.55", borderWidth = 1, textColor = "on_surface", isKeycap = false }
 end
 
 local function render()
@@ -49,7 +64,7 @@ local function render()
   end
 
   local fontSize = getFontSize()
-  local fill, border, borderWidth = getStyle()
+  local st = getStyle()
   local gap = noctalia.getConfig("margin") or 6
   local padding = noctalia.getConfig("padding") or 6
   local items = {}
@@ -63,7 +78,7 @@ local function render()
         text = symbols[part] or part,
         fontSize = fontSize,
         fontWeight = "bold",
-        color = "on_surface",
+        color = st.textColor,
       }))
 
       if i < #parts then
@@ -71,26 +86,54 @@ local function render()
           text = "+",
           fontSize = math.max(9, fontSize - 3),
           fontWeight = "bold",
-          color = "on_surface_variant",
+          color = if st.isKeycap then st.textColor else "on_surface_variant",
         }))
       end
     end
 
     local isSingleKey = #parts == 1 and #combo <= 3
-    local padH = isSingleKey and 7 or 10
-    local itemHeight = 30
+    local padH = isSingleKey and math.max(8, math.floor(fontSize * 0.6)) or math.max(11, math.floor(fontSize * 0.85))
+    local itemHeight = math.max(26, math.floor(fontSize * 1.6))
 
-    table.insert(items, ui.row({
-      height = itemHeight,
-      paddingH = padH,
-      gap = 6,
-      fill = fill,
-      border = border,
-      borderWidth = borderWidth,
-      radius = 7,
-      align = "center",
-      justify = "center",
-    }, children))
+    if st.isKeycap then
+      local basePadBottom = math.max(3, math.floor(fontSize * 0.2))
+      -- Extruded keycap base layer
+      table.insert(items, ui.row({
+        paddingH = 1,
+        paddingBottom = basePadBottom,
+        fill = st.baseColor,
+        border = st.shadowColor,
+        borderWidth = 1,
+        radius = math.max(7, math.floor(fontSize * 0.45)),
+        align = "center",
+        justify = "center",
+      }, {
+        -- Keycap top face
+        ui.row({
+          height = itemHeight,
+          paddingH = padH,
+          gap = 6,
+          fill = st.fill,
+          border = st.border,
+          borderWidth = 1,
+          radius = math.max(5, math.floor(fontSize * 0.35)),
+          align = "center",
+          justify = "center",
+        }, children),
+      }))
+    else
+      table.insert(items, ui.row({
+        height = itemHeight,
+        paddingH = padH,
+        gap = 6,
+        fill = st.fill,
+        border = st.border,
+        borderWidth = st.borderWidth or 1,
+        radius = math.max(6, math.floor(fontSize * 0.4)),
+        align = "center",
+        justify = "center",
+      }, children))
+    end
   end
 
   panel.render(ui.row({
@@ -118,5 +161,3 @@ function onOpen()
 end
 
 render()
-
-
