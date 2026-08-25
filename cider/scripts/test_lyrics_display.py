@@ -88,10 +88,18 @@ class ClockExtrapolationTests(unittest.TestCase):
         far = {"text": "thing", "start": 2_000, "end": 2_200}
         unsung_line = cfg.token_rgba_for_paint(far, 2_000, 2_200, 0, paint)
         self.assertAlmostEqual(unsung_line[0], cfg.NEXT_RGBA[0], places=2)
+        # Fixed palette so active vs sung stay distinct even when Noctalia
+        # theme tokens land on similar greens.
+        contrast = {
+            "sung": (1.0, 1.0, 1.0, 1.0),
+            "active": (1.0, 0.0, 0.0, 1.0),
+            "upcoming": cfg.NEXT_RGBA,
+            "next": cfg.NEXT_RGBA,
+        }
         later = {"text": "thing", "start": 200, "end": 400}
-        live_future = cfg.token_rgba_for_paint(later, 0, 400, 80, paint)
-        self.assertAlmostEqual(live_future[1], paint["active"][1], places=2)
-        self.assertNotAlmostEqual(live_future[1], paint["sung"][1], places=1)
+        live_future = cfg.token_rgba_for_paint(later, 0, 400, 80, contrast)
+        self.assertAlmostEqual(live_future[1], contrast["active"][1], places=2)
+        self.assertNotAlmostEqual(live_future[1], contrast["sung"][1], places=1)
         overlay = (ROOT / "scripts" / "lyrics_overlay.py").read_text(encoding="utf-8")
         self.assertNotIn('self._mul_a(self._paint["sung"], alpha)', overlay)
         self.assertIn("line_only_current_rgba", overlay)
@@ -264,6 +272,44 @@ class CueMixTests(unittest.TestCase):
         self.assertIn("_draw_cue_depth", overlay)
         self.assertNotIn('mix_rgba(self._paint["next"], self._paint["sung"]', overlay)
         self.assertIn("self._draw_karaoke(cr, width, current_y, alpha)", overlay)
+
+    def test_overlay_python_parses(self) -> None:
+        import ast
+
+        src = (ROOT / "scripts" / "lyrics_overlay.py").read_text(encoding="utf-8")
+        ast.parse(src)
+
+    def test_line_anim_direction_follows_seek(self) -> None:
+        self.assertTrue(cfg.line_anim_forward(0))
+        self.assertTrue(cfg.line_anim_forward(40))
+        self.assertTrue(cfg.line_anim_forward(-50))  # mild clock catch-up
+        self.assertFalse(cfg.line_anim_forward(-500))
+        self.assertFalse(cfg.line_anim_forward(-5_000))
+        self.assertTrue(cfg.line_anim_forward_from_index(3, 4))
+        self.assertTrue(cfg.line_anim_forward_from_index(3, 3))
+        self.assertFalse(cfg.line_anim_forward_from_index(5, 2))
+        self.assertEqual(cfg.line_anim_duration_ms(1), cfg.LINE_ANIM_MS)
+        self.assertLess(cfg.line_anim_duration_ms(4), cfg.LINE_ANIM_MS)
+        self.assertGreater(cfg.line_anim_interrupt_elapsed_ms(0.4, 460), 0.0)
+        self.assertEqual(cfg.line_anim_interrupt_elapsed_ms(1.0, 460), 0.0)
+        # Shrink path past → current must work (promote_scale cannot).
+        self.assertAlmostEqual(
+            cfg.depth_layout_scale(
+                0.0, cfg.PAST_FONT_PX, cfg.CURRENT_FONT_PX, cfg.CURRENT_FONT_PX
+            ),
+            cfg.PAST_FONT_PX / cfg.CURRENT_FONT_PX,
+        )
+        self.assertAlmostEqual(
+            cfg.depth_layout_scale(
+                1.0, cfg.PAST_FONT_PX, cfg.CURRENT_FONT_PX, cfg.CURRENT_FONT_PX
+            ),
+            1.0,
+        )
+        overlay = (ROOT / "scripts" / "lyrics_overlay.py").read_text(encoding="utf-8")
+        self.assertIn("_draw_arrive_from_past", overlay)
+        self.assertIn("line_anim_forward_from_index", overlay)
+        self.assertIn("self._anim_forward", overlay)
+        self.assertIn("line_anim_duration_ms", overlay)
 
     def test_cue_dots_grow_forward_not_slide_up(self) -> None:
         # Layout is always CUE_BASE. Incoming visual size is far → base.

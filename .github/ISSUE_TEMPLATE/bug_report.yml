@@ -30,6 +30,7 @@ body:
         - ai-usagebar
         - anilist
         - arch-updater
+        - asus-fan
         - audio-switcher
         - battery-graph
         - battery-power-management
@@ -45,6 +46,7 @@ body:
         - codexbar-meter
         - color_picker
         - config-swap
+        - custom-shortcut
         - daily-wallpaper
         - deepseek_usage
         - discord-voice
@@ -92,9 +94,12 @@ body:
         - niri-displays
         - nix-monitor
         - noctwhspr
+        - nvtop
         - obs-integration
         - obsidian
+        - ocr
         - opencode-companion
+        - opencodex-bar
         - opnsense
         - palette-creator
         - pass
@@ -117,6 +122,7 @@ body:
         - spotify-lyrics
         - ssh-launcher
         - syncthing
+        - system-monitor
         - system-updater
         - tailnet
         - tailscale
@@ -133,6 +139,7 @@ body:
         - w-engine
         - wallpaper-switcher
         - web-launcher
+        - wireview-pro-ii
         - wl-screen-mirror
         - zed-provider
 
