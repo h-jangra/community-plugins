@@ -42,7 +42,9 @@
       "options": {
         "glass": "Glass (Blurred)",
         "solid": "Solid Surface",
-        "accent": "Accent Outline"
+        "accent": "Accent Outline",
+        "keycap_dark": "Keycap (Dark)",
+        "keycap_light": "Keycap (Light)"
       }
     },
     "show_modifiers_only": {
